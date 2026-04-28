@@ -407,7 +407,7 @@ async function doDeny(id){
 
 // ── SPIN WHEEL ────────────────────────────────────────────────────────────
 async function doSpin(kidId){
-  const prizes=[5,10,10,15,20,25,50,3,8,12,30,100];
+  const prizes=[10,20,30,40,50,60,70,80,90,100];
   const prize=prizes[Math.floor(Math.random()*prizes.length)];
   const ki=S.users.findIndex(u=>u.id===kidId);if(ki<0)return;
   S.users[ki].coins=(S.users[ki].coins||0)+prize;
