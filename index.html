@@ -735,7 +735,7 @@ function vGuardian(){
     <div style="background:var(--card);border-radius:10px;border:1px solid var(--brd);padding:4px 13px">
       ${feed.map(f=>`<div class="feed-item"><div style="font-size:16px">✅</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">${esc(f.un)}</div><div style="font-size:11px;color:var(--text3)">${esc(f.title)}</div></div><div class="chip" style="font-size:10px;padding:2px 7px">+🪙${f.coins}</div></div>`).join('')}
     </div>`:''}`;
-  }(S.gtab==='tasks'){
+  }else if(S.gtab==='tasks'){
     const ch=kids.map(c=>`<option value="${c.id}">${esc(c.un)}</option>`).join('');
     ct=`${toastH()}${missingLn()}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px"><div style="font-size:13px;font-weight:700">Tasks (${myT.length})</div><button class="btn btn-p btn-sm" onclick="S.addTask=!S.addTask;S.err=null;render()">${S.addTask?'✕ Cancel':'+ Add Task'}</button></div>
