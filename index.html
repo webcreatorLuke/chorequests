@@ -120,8 +120,8 @@ select.inp{cursor:pointer}
 <div id="root"><div id="app"></div></div>
 <script>
 const DB={
-  async get(k){try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null}catch{try{return JSON.parse(localStorage.getItem(k))}catch{return null}}},
-  async set(k,v){const s=JSON.stringify(v);try{await window.storage.set(k,s,true)}catch{}try{localStorage.setItem(k,s)}catch{}}
+  async get(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}},
+  async set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 };
 
 const S={
