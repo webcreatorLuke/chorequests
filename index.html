@@ -12,6 +12,16 @@
 #root{--bg:#F8F7F4;--bg2:#EFEDE8;--card:#fff;--text:#1A1918;--text2:#5C5A57;--text3:#9A9895;--ac:#5E8B64;--gold:#D49B18;--red:#C02030;--brd:rgba(28,27,26,0.12);font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:500px}
 #root.dark{--bg:#111318;--bg2:#1A1D24;--card:#1E2130;--text:#E8E8F0;--text2:#9A99AA;--text3:#6A6980;--ac:#72A878;--gold:#F4B942;--red:#FF7A8A;--brd:rgba(255,255,255,0.1)}
 *{box-sizing:border-box;margin:0;padding:0}
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:64px;background:var(--card);border-right:1px solid var(--brd);display:flex;flex-direction:column;align-items:center;padding:12px 0;position:fixed;top:0;left:0;bottom:0;z-index:20;gap:4px}
+.sb-logo{font-size:22px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--brd);width:100%;text-align:center}
+.sb-btn{width:48px;height:48px;border-radius:10px;border:none;background:transparent;color:var(--text3);font-size:20px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all .15s;position:relative;font-family:inherit}
+.sb-btn:hover{background:var(--bg2);color:var(--text)}
+.sb-btn.on{background:rgba(94,139,100,.15);color:var(--ac)}
+.sb-label{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;line-height:1}
+.sb-badge{position:absolute;top:5px;right:5px;background:#E85D75;color:#fff;border-radius:100px;font-size:8px;font-weight:800;padding:1px 4px;min-width:14px;text-align:center}
+.sb-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:12px;border-top:1px solid var(--brd);width:100%}
+.main-area{margin-left:64px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 .wrap{max-width:640px;margin:0 auto;padding:0 16px 40px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:transform .1s}
 .btn:active{transform:scale(.97)}
@@ -20,6 +30,8 @@
 .btn-rd{background:var(--red);color:#fff;border:none}
 .btn-o{background:transparent;color:var(--text2);border:1px solid var(--brd)}.btn-o:hover{background:var(--bg2)}
 .btn-sm{padding:6px 11px;font-size:12px}.btn-fw{width:100%}
+.btn-cashin{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;transition:transform .1s}
+.btn-cashin:active{transform:scale(.97)}
 .inp{width:100%;padding:10px 12px;border:1.5px solid var(--brd);border-radius:8px;font-size:14px;background:var(--bg2);color:var(--text);font-family:inherit;outline:none;transition:border-color .15s}
 .inp:focus{border-color:var(--ac)}.inp::placeholder{color:var(--text3)}
 select.inp{cursor:pointer}
@@ -29,7 +41,7 @@ select.inp{cursor:pointer}
 .tab{flex:1;padding:8px 4px;border-radius:6px;border:none;background:transparent;color:var(--text2);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;position:relative}
 .tab.on{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .badge{position:absolute;top:2px;right:4px;background:#E85D75;color:#fff;border-radius:100px;font-size:9px;font-weight:800;padding:1px 4px}
-.topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--brd)}
+.topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--brd);margin-left:0}
 .chip{display:inline-flex;align-items:center;gap:4px;background:rgba(212,155,24,.12);color:var(--gold);border-radius:100px;padding:5px 10px;font-size:13px;font-weight:800}
 .err{background:rgba(192,32,48,.09);color:var(--red);border-radius:8px;padding:10px 13px;font-size:13px;font-weight:600;margin-bottom:12px}
 .warn{background:rgba(212,155,24,.1);border:1.5px solid rgba(212,155,24,.35);color:var(--gold);border-radius:10px;padding:13px 15px;margin-bottom:14px;font-size:13px;font-weight:600}
@@ -152,7 +164,7 @@ const S={
   signup:{step:1,data:{type:'guardian'}},
   err:null,toast:null,addTask:false,addRwd:false,confRwd:null,
   modal:null,confirmKid:null,confirmReset:null,dangerState:null,
-  ptsPreset:null,lbTab:'alltime',spinResult:null,addGoal:false,addShout:false
+  ptsPreset:null,lbTab:'alltime',spinResult:null,addGoal:false,addShout:false,cashInModal:false
 };
 
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -450,6 +462,16 @@ async function doSendShout(toId){
 }
 async function doDeleteShout(sid){S.shoutouts=S.shoutouts.filter(s=>s.id!==sid);await saveAll();render()}
 
+async function doCashIn(){
+  const u=S.cur;const coins=u.coins||0;
+  if(coins<1000)return showToast('Need at least 1,000 coins to cash in!',true);
+  const dollars=Math.floor(coins/1000);const remainder=coins%1000;
+  const i=S.users.findIndex(x=>x.id===u.id);
+  S.users[i].coins=remainder;S.cur=S.users[i];
+  await saveAll();S.cashInModal=false;
+  showToast(`💵 Cashed in $${dollars}! ${remainder} coins remaining.`);
+}
+
 function setErr(m){S.err=m;render()}
 function showToast(m,isE){S.toast={m,isE};render();setTimeout(()=>{S.toast=null;render()},2600)}
 function setSignupDark(d){S.signup.data.dark=d;document.getElementById('root').classList.toggle('dark',d);render()}
@@ -457,7 +479,7 @@ function openSettings(){S.modal={type:'settings'};S.dangerState=null;S.err=null;
 function openLnModal(){S.modal={type:'ln'};S.err=null;render()}
 function openKidProfile(kid){S.modal={type:'kid',kid};S.ptsPreset=null;S.err=null;render()}
 function openSwitchAccount(){S.modal={type:'switch'};S.err=null;render()}
-function closeModal(){S.modal=null;S.confirmKid=null;S.confirmReset=null;S.dangerState=null;S.ptsPreset=null;S.spinResult=null;S.addShout=false;S.err=null;render()}
+function closeModal(){S.modal=null;S.confirmKid=null;S.confirmReset=null;S.dangerState=null;S.ptsPreset=null;S.spinResult=null;S.addShout=false;S.cashInModal=false;S.err=null;render()}
 function signupNext(){
   const d=S.signup.data;
   if(S.signup.step===2){
@@ -843,20 +865,54 @@ function vChild(){
   const u=S.cur;const rk=getRank(u.total||0);const g=S.users.find(x=>x.id===u.gid);
   const fam=u.ln||g?.ln||'';const streak=getStreak(u.id);
   const myRed=S.redemptions.filter(r=>r.cid===u.id);const pendMine=myRed.filter(r=>r.status==='pending').length;
+  const coins=u.coins||0;const canCashIn=coins>=1000;
+  const dollars=Math.floor(coins/1000);
+
+  // Cash In modal
+  const cashInModalH=S.cashInModal?`<div class="modal-bg" onclick="S.cashInModal=false;render()"><div class="modal" onclick="event.stopPropagation()">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:40px;margin-bottom:8px">💵</div>
+      <div style="font-size:18px;font-weight:800">Cash In Your Coins!</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">1,000 coins = $1.00</div>
+    </div>
+    <div style="background:rgba(34,197,94,.1);border:1.5px solid rgba(34,197,94,.3);border-radius:10px;padding:14px;margin-bottom:14px;text-align:center">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:6px">You have <strong style="color:var(--gold)">🪙${coins} coins</strong></div>
+      <div style="font-size:28px;font-weight:800;color:#16a34a">💵 $${dollars}.00</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">${coins%1000} coins left over after cash-in</div>
+    </div>
+    ${errH()}
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-o" style="flex:1" onclick="S.cashInModal=false;S.err=null;render()">Cancel</button>
+      <button class="btn-cashin" style="flex:1;justify-content:center;padding:10px" onclick="doCashIn()">💵 Cash In $${dollars}!</button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:10px">Ask your parent to pay you $${dollars}!</div>
+  </div></div>`:'';
+
+  const sidebar=`<div class="sidebar">
+    <div class="sb-logo">⭐</div>
+    <button class="sb-btn${S.ctab==='tasks'?' on':''}" onclick="S.ctab='tasks';S.err=null;render()"><span>📋</span><span class="sb-label">Tasks</span></button>
+    <button class="sb-btn${S.ctab==='shop'?' on':''}" onclick="S.ctab='shop';S.confRwd=null;S.err=null;render()"><span>🎁</span><span class="sb-label">Rewards</span>${pendMine?`<span class="sb-badge">${pendMine}</span>`:''}</button>
+    <button class="sb-btn${S.ctab==='history'?' on':''}" onclick="S.ctab='history';S.err=null;render()"><span>📜</span><span class="sb-label">History</span></button>
+    <button class="sb-btn${S.ctab==='stats'?' on':''}" onclick="S.ctab='stats';S.err=null;render()"><span>🏆</span><span class="sb-label">Rank</span></button>
+    <div class="sb-bottom">
+      <button class="sb-btn" onclick="openSettings()"><span>⚙️</span><span class="sb-label">Settings</span></button>
+      <button class="sb-btn" onclick="doLogout()"><span>🚪</span><span class="sb-label">Logout</span></button>
+    </div>
+  </div>`;
+
   const topbar=`<div class="topbar">
     <div><div style="font-size:15px;font-weight:800">⭐ ${esc(u.un)}${streak>0?` <span class="streak">🔥${streak}</span>`:''}</div>
     <div style="font-size:11px;color:${rk.color}">${rk.emoji} ${rk.name}${fam?' · The '+esc(fam)+' Family':''}</div></div>
-    <div style="display:flex;align-items:center;gap:6px"><div class="chip">🪙${u.coins||0}</div>${swBtn()}<button class="btn btn-o btn-sm" onclick="openSettings()">⚙️</button><button class="btn btn-o btn-sm" onclick="doLogout()">Log out</button></div>
+    <div style="display:flex;align-items:center;gap:7px">
+      <div class="chip">🪙${coins}</div>
+      ${swBtn()}
+      <button class="btn-cashin" onclick="S.cashInModal=true;S.err=null;render()" ${!canCashIn?'style="opacity:.45;cursor:not-allowed"':''} ${!canCashIn?'disabled':''}>💵 Cash In${canCashIn?` $${dollars}`:''}!</button>
+    </div>
   </div>`;
-  const tabs=`<div class="tabs">
-    <button class="tab${S.ctab==='tasks'?' on':''}" onclick="S.ctab='tasks';S.err=null;render()">Tasks</button>
-    <button class="tab${S.ctab==='shop'?' on':''}" onclick="S.ctab='shop';S.confRwd=null;S.err=null;render()">Rewards 🎁</button>
-    <button class="tab${S.ctab==='history'?' on':''}" onclick="S.ctab='history';S.err=null;render()">History${pendMine?`<span class="badge">${pendMine}</span>`:''}</button>
-    <button class="tab${S.ctab==='stats'?' on':''}" onclick="S.ctab='stats';S.err=null;render()">Rank 🏆</button>
-  </div>`;
+
   let ct='';
   if(S.ctab==='tasks'){
-    if(!u.gid)return`${topbar}<div class="wrap" style="padding-top:16px">${tabs}<div class="empty" style="padding-top:40px"><div style="font-size:32px;margin-bottom:10px">🔗</div><div style="font-size:15px;font-weight:800;margin-bottom:6px">Not linked to a guardian</div><div style="font-size:13px">Log out and sign up using your guardian's username.</div></div></div>`;
+    if(!u.gid)return`<div class="app-shell">${sidebar}<div class="main-area">${topbar}<div class="wrap" style="padding-top:16px"><div class="empty" style="padding-top:40px"><div style="font-size:32px;margin-bottom:10px">🔗</div><div style="font-size:15px;font-weight:800;margin-bottom:6px">Not linked to a guardian</div><div style="font-size:13px">Log out and sign up using your guardian's username.</div></div></div></div></div>${cashInModalH}`;
     const myT=S.tasks.filter(t=>t.gid===u.gid&&(t.to==='all'||t.to===u.id));
     const todo=myT.filter(t=>!taskDone(t,u.id));const done=myT.filter(t=>taskDone(t,u.id));
     ct=`${toastH()}
@@ -872,25 +928,25 @@ function vChild(){
   }else if(S.ctab==='shop'){
     const gr=u.gid?S.rewards.filter(r=>r.gid===u.gid):[];
     const pendingRids=new Set(S.redemptions.filter(r=>r.cid===u.id&&r.status==='pending').map(r=>r.rid));
-    ct=`${toastH()}<div style="background:var(--bg2);border-radius:8px;padding:11px 13px;margin-bottom:13px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;color:var(--text2);font-weight:600">Your balance</span><div class="chip">🪙${u.coins||0}</div></div>
-    ${pendingRids.size>0?`<div style="background:rgba(212,155,24,.1);border:1.5px solid rgba(212,155,24,.35);border-radius:10px;padding:11px 13px;margin-bottom:13px;font-size:13px;color:var(--gold);font-weight:700">⏳ You have ${pendingRids.size} cash-in request${pendingRids.size>1?'s':''} waiting for your parent to approve!</div>`:''}
-    ${gr.length===0?`<div class="empty">No rewards yet. Ask your guardian!</div>`:gr.map(r=>{const can=(u.coins||0)>=r.cost;const conf=S.confRwd===r.id;const isPending=pendingRids.has(r.id);
+    ct=`${toastH()}<div style="background:var(--bg2);border-radius:8px;padding:11px 13px;margin-bottom:13px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;color:var(--text2);font-weight:600">Your balance</span><div class="chip">🪙${coins}</div></div>
+    ${pendingRids.size>0?`<div style="background:rgba(212,155,24,.1);border:1.5px solid rgba(212,155,24,.35);border-radius:10px;padding:11px 13px;margin-bottom:13px;font-size:13px;color:var(--gold);font-weight:700">⏳ You have ${pendingRids.size} reward request${pendingRids.size>1?'s':''} waiting for parent approval!</div>`:''}
+    ${gr.length===0?`<div class="empty">No rewards yet. Ask your guardian!</div>`:gr.map(r=>{const can=coins>=r.cost;const conf=S.confRwd===r.id;const isPending=pendingRids.has(r.id);
       return`<div class="rc" style="${conf?'border-color:var(--gold);border-width:1.5px':''}"><div style="display:flex;align-items:center;gap:10px"><div style="font-size:22px">🎁</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">${esc(r.title)}</div>${r.desc?`<div style="font-size:11px;color:var(--text3)">${esc(r.desc)}</div>`:''}</div><div class="chip" style="font-size:11px;padding:3px 8px">🪙${r.cost}</div></div>
       ${isPending
-        ?`<div style="margin-top:10px;padding:9px 11px;background:rgba(212,155,24,.09);border-radius:8px;border:1px solid rgba(212,155,24,.3);display:flex;align-items:center;gap:8px"><span style="font-size:15px">⏳</span><span style="font-size:12px;font-weight:700;color:var(--gold)">Cash-in request sent! Waiting for parent approval…</span></div>`
+        ?`<div style="margin-top:10px;padding:9px 11px;background:rgba(212,155,24,.09);border-radius:8px;border:1px solid rgba(212,155,24,.3);display:flex;align-items:center;gap:8px"><span style="font-size:15px">⏳</span><span style="font-size:12px;font-weight:700;color:var(--gold)">Request sent! Waiting for parent approval…</span></div>`
         :conf
           ?`<div style="margin-top:11px;padding-top:11px;border-top:1px solid var(--brd)">
               <div style="background:rgba(94,139,100,.08);border-radius:8px;padding:10px 11px;margin-bottom:10px">
-                <div style="font-size:13px;font-weight:800;margin-bottom:3px">📨 Send cash-in request to your parent?</div>
-                <div style="font-size:12px;color:var(--text2)">This will cost <strong style="color:var(--gold)">🪙${r.cost}</strong> and your parent will need to approve it. You'll have <strong>🪙${(u.coins||0)-r.cost}</strong> left.</div>
+                <div style="font-size:13px;font-weight:800;margin-bottom:3px">📨 Request this reward from your parent?</div>
+                <div style="font-size:12px;color:var(--text2)">Costs <strong style="color:var(--gold)">🪙${r.cost}</strong> — you'll have <strong>🪙${coins-r.cost}</strong> left.</div>
               </div>
-              <div style="display:flex;gap:8px"><button class="btn btn-o btn-sm" onclick="S.confRwd=null;render()">Cancel</button><button class="btn btn-g btn-sm" style="flex:1" onclick="doRedeem('${r.id}')">💸 Cash In — Send Request!</button></div>
+              <div style="display:flex;gap:8px"><button class="btn btn-o btn-sm" onclick="S.confRwd=null;render()">Cancel</button><button class="btn btn-g btn-sm" style="flex:1" onclick="doRedeem('${r.id}')">🎁 Request Reward!</button></div>
             </div>`
           :`<div style="margin-top:9px">${can
-            ?`<button class="btn btn-sm btn-fw" style="background:var(--gold);color:#fff;font-size:13px;padding:10px" onclick="S.confRwd='${r.id}';render()">💸 Cash In</button>`
+            ?`<button class="btn btn-sm btn-fw" style="background:var(--gold);color:#fff;font-size:13px;padding:10px" onclick="S.confRwd='${r.id}';render()">🎁 Redeem</button>`
             :`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
-                <div style="height:6px;flex:1;background:var(--bg2);border-radius:3px;overflow:hidden;margin-right:9px"><div style="height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ac),var(--gold));width:${Math.min(100,Math.round(((u.coins||0)/r.cost)*100))}%"></div></div>
-                <span style="font-size:11px;font-weight:800;color:var(--text3);white-space:nowrap">Need ${r.cost-(u.coins||0)} more 🪙</span>
+                <div style="height:6px;flex:1;background:var(--bg2);border-radius:3px;overflow:hidden;margin-right:9px"><div style="height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ac),var(--gold));width:${Math.min(100,Math.round((coins/r.cost)*100))}%"></div></div>
+                <span style="font-size:11px;font-weight:800;color:var(--text3);white-space:nowrap">Need ${r.cost-coins} more 🪙</span>
               </div>`
           }</div>`
       }</div>`;}).join('')}`;
@@ -1064,7 +1120,7 @@ function vChild(){
     <div style="font-size:13px;font-weight:700;margin-bottom:10px">All Ranks</div>
     ${RANKS.map(r=>{const isc=r.name===rk.name;return`<div style="display:flex;align-items:center;gap:10px;padding:11px 12px;background:${isc?'rgba(94,139,100,.07)':'var(--card)'};border:${isc?'1.5px solid var(--ac)':'1px solid var(--brd)'};border-radius:8px;margin-bottom:7px"><div style="font-size:20px">${r.emoji}</div><div style="flex:1"><div style="font-size:13px;font-weight:700;color:${r.color}">${r.name}${isc?' ← you':''}</div><div style="font-size:11px;color:var(--text3)">${r.max===Infinity?r.min+'+ coins':r.min+'–'+r.max+' coins'}</div></div>${total>=r.min?`<span style="font-size:11px;font-weight:800;color:var(--ac)">✓</span>`:''}</div>`;}).join('')}`;
   }
-  return`${topbar}<div class="wrap" style="padding-top:16px">${tabs}${ct}</div>`;
+  return`<div class="app-shell">${sidebar}<div class="main-area">${topbar}<div class="wrap" style="padding-top:16px">${ct}</div></div></div>${cashInModalH}`;
 }
 
 (async()=>{await load()})();
